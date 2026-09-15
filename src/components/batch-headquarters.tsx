@@ -102,6 +102,7 @@ function Hero() {
       <div className="hero-content">
         <Eyebrow>SYSTEM ONLINE // CSE-07</Eyebrow>
         <p className="hero-kicker">WE CODE. WE CREATE. WE CONNECT.</p>
+        <img src="/batch-logo-hero.png" alt="CSE 7th Batch logo" className="hero-batch-logo" />
         <h1>CSE <span>7TH</span><br />BATCH</h1>
         <p className="hero-copy">One batch. Hundreds of stories. Infinite possibilities.</p>
         <div className="hero-actions">

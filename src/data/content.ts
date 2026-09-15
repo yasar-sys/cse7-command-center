@@ -63,6 +63,7 @@ export const achievements: Achievement[] = [
 ];
 
 export const memories: Memory[] = [
+  { image: "/memories/batch-group-photo.jpg", alt: "CSE 7th Batch group photo at Mymensingh Engineering College", caption: "THE CREW // ASSEMBLED", date: "2023", event: "BATCH GROUP PHOTO", category: "CAMPUS" },
   { image: "/memories/memory-01.jpg", alt: "Replace with a real batch memory", caption: "MEMORY PLACEHOLDER", event: "EVENT — REPLACE", category: "CAMPUS", isPlaceholder: true },
   { image: "/memories/memory-02.jpg", alt: "Replace with a real batch event", caption: "MEMORY PLACEHOLDER", event: "EVENT — REPLACE", category: "EVENTS", isPlaceholder: true },
   { image: "/memories/memory-03.jpg", alt: "Replace with a real batch tour", caption: "MEMORY PLACEHOLDER", event: "EVENT — REPLACE", category: "TOURS", isPlaceholder: true },
