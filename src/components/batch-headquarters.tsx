@@ -70,6 +70,7 @@ function Navbar() {
   return (
     <header className={`site-nav ${compact ? "is-compact" : ""}`}>
       <button className="brand-mark" onClick={() => scrollTo("home")} aria-label="Return to home">
+        <img src="/batch-logo.png" alt="CSE 7th Batch logo" className="brand-logo" />
         <span>CSE</span><i>//</i><strong>07</strong>
       </button>
       <nav className="desktop-nav" aria-label="Primary navigation">
@@ -279,7 +280,10 @@ function Footer() {
     <footer id="contact" className="site-footer">
       <div className="footer-grid">
         <div><p className="section-code">CONNECTION // OPEN</p><h2>CSE <span>//</span> 07</h2><p>Connected by code. Defined by memories.</p></div>
-        <dl><div><dt>DEPARTMENT</dt><dd>{siteDetails.department}</dd></div><div><dt>BATCH</dt><dd>{siteDetails.batch}</dd></div><div><dt>UNIVERSITY</dt><dd>{siteDetails.university}</dd></div><div><dt>OFFICIAL EMAIL</dt><dd><a href={`mailto:${siteDetails.email}`}><Mail />{siteDetails.email}</a></dd></div></dl>
+        <div className="footer-institution">
+          <img src="/college-logo.png" alt="Mymensingh Engineering College logo" className="college-logo" />
+          <dl><div><dt>DEPARTMENT</dt><dd>{siteDetails.department}</dd></div><div><dt>BATCH</dt><dd>{siteDetails.batch}</dd></div><div><dt>UNIVERSITY</dt><dd>{siteDetails.university}</dd></div><div><dt>OFFICIAL EMAIL</dt><dd><a href={`mailto:${siteDetails.email}`}><Mail />{siteDetails.email}</a></dd></div></dl>
+        </div>
       </div>
       <p className="privacy-note">PRIVACY NOTICE // Only information explicitly added to the editable batch records is displayed.</p>
       <div className="footer-bottom"><p>© 2026 CSE 7th Batch. All rights reserved.</p><p><Terminal /> CONNECTION TERMINATED // SEE YOU IN THE NEXT COMMIT</p></div>
