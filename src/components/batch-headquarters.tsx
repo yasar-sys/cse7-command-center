@@ -113,16 +113,16 @@ function Hero() {
             <Button variant="hudOutline" size="lg" onClick={() => scrollTo("members")}>EXPLORE MEMBERS <ArrowUpRight /></Button>
           </div>
         </div>
+        <aside className="status-panel" aria-label="Batch system status">
+          <div className="status-panel-head"><span>SYSTEM DIAGNOSTICS</span><b>LIVE</b></div>
+          <dl>
+            <div><dt>BATCH STATUS</dt><dd>ACTIVE</dd></div>
+            <div><dt>DEPARTMENT</dt><dd>COMPUTER SCIENCE &amp; ENGINEERING</dd></div>
+            <div><dt>BATCH</dt><dd>07</dd></div>
+            <div><dt>SYSTEM</dt><dd>ONLINE</dd></div>
+          </dl>
+        </aside>
       </div>
-      <aside className="status-panel" aria-label="Batch system status">
-        <div className="status-panel-head"><span>SYSTEM DIAGNOSTICS</span><b>LIVE</b></div>
-        <dl>
-          <div><dt>BATCH STATUS</dt><dd>ACTIVE</dd></div>
-          <div><dt>DEPARTMENT</dt><dd>COMPUTER SCIENCE &amp; ENGINEERING</dd></div>
-          <div><dt>BATCH</dt><dd>07</dd></div>
-          <div><dt>SYSTEM</dt><dd>ONLINE</dd></div>
-        </dl>
-      </aside>
       <p className="hero-command"><Terminal /> ./initialize_batch.sh <span>READY</span></p>
     </section>
   );
