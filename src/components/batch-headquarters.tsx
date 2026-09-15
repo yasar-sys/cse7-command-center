@@ -99,15 +99,19 @@ function Hero() {
       <div className="grid-plane" aria-hidden="true" />
       <div className="hero-particles" aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</div>
       <div className="hero-coordinates" aria-hidden="true">35.6762° N / 139.6503° E<br />0x07F2 // 01110011</div>
-      <div className="hero-content">
-        <Eyebrow>SYSTEM ONLINE // CSE-07</Eyebrow>
-        <p className="hero-kicker">WE CODE. WE CREATE. WE CONNECT.</p>
-        <img src="/batch-logo-hero.png" alt="CSE 7th Batch logo" className="hero-batch-logo" />
-        <h1>CSE <span>7TH</span><br />BATCH</h1>
-        <p className="hero-copy">One batch. Hundreds of stories. Infinite possibilities.</p>
-        <div className="hero-actions">
-          <Button variant="hud" size="lg" onClick={() => scrollTo("about")}>ENTER THE BATCH <ArrowDown /></Button>
-          <Button variant="hudOutline" size="lg" onClick={() => scrollTo("members")}>EXPLORE MEMBERS <ArrowUpRight /></Button>
+      <div className="hero-grid">
+        <div className="hero-logo-side">
+          <img src="/batch-logo-hero.png" alt="CSE 7th Batch logo" className="hero-batch-logo" />
+        </div>
+        <div className="hero-text-side">
+          <Eyebrow>SYSTEM ONLINE // CSE-07</Eyebrow>
+          <p className="hero-kicker">WE CODE. WE CREATE. WE CONNECT.</p>
+          <h1>CSE <span>7TH</span><br />BATCH</h1>
+          <p className="hero-copy">One batch. Hundreds of stories. Infinite possibilities.</p>
+          <div className="hero-actions">
+            <Button variant="hud" size="lg" onClick={() => scrollTo("about")}>ENTER THE BATCH <ArrowDown /></Button>
+            <Button variant="hudOutline" size="lg" onClick={() => scrollTo("members")}>EXPLORE MEMBERS <ArrowUpRight /></Button>
+          </div>
         </div>
       </div>
       <aside className="status-panel" aria-label="Batch system status">
