@@ -51,10 +51,14 @@ function PlaceholderImage({ label, className = "" }: { label: string; className?
   );
 }
 
+function markBroken(node: HTMLImageElement | null, onFail: () => void) {
+  if (node && node.complete && node.naturalWidth === 0) onFail();
+}
+
 function SmartImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <PlaceholderImage label={`${alt} placeholder`} className={className} />;
-  return <img className={className} src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} />;
+  return <img className={className} src={src} alt={alt} loading="lazy" ref={(node) => markBroken(node, () => setFailed(true))} onError={() => setFailed(true)} />;
 }
 
 function Navbar() {
@@ -150,7 +154,7 @@ function About() {
 function MemberAvatar({ member, large = false }: { member: Member; large?: boolean }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <div className={`member-avatar fallback ${large ? "large" : ""}`} role="img" aria-label={`Default avatar for ${member.name}`}><span>{member.name.slice(0, 2)}</span><ShieldCheck /></div>;
-  return <img className={`member-avatar ${large ? "large" : ""}`} src={member.image} alt={`${member.name} profile`} loading="lazy" onError={() => setFailed(true)} />;
+  return <img className={`member-avatar ${large ? "large" : ""}`} src={member.image} alt={`${member.name} profile`} loading="lazy" ref={(node) => markBroken(node, () => setFailed(true))} onError={() => setFailed(true)} />;
 }
 
 function MemberProfile({ member, onClose }: { member: Member; onClose: () => void }) {
@@ -184,10 +188,14 @@ function MemberProfile({ member, onClose }: { member: Member; onClose: () => voi
   );
 }
 
+const MEMBER_PREVIEW_COUNT = 12;
+
 function Members() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("az");
   const [role, setRole] = useState("all");
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState<Member | null>(null);
   const roles = useMemo(() => [...new Set(members.map((member) => member.role).filter(Boolean))], []);
   const results = useMemo(() => {
@@ -204,18 +212,28 @@ function Members() {
     });
   }, [query, role, sort]);
 
+  const isFiltering = query.trim().length > 0 || role !== "all";
+  const expanded = showAll || isFiltering;
+  const visible = expanded ? results : results.slice(0, MEMBER_PREVIEW_COUNT);
+  const hidden = results.length - visible.length;
+
   return (
     <section id="members" className="section-shell members-section">
       <SectionHeading code="02 // PERSONNEL DATABASE" title="THE CREW" copy="Every node has a story." />
-      <div className="directory-console reveal">
-        <div className="search-box"><Search aria-hidden="true" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="SEARCH BATCH DATABASE..." aria-label="Search members" /></div>
-        <Select value={role} onValueChange={setRole}><SelectTrigger aria-label="Filter by role"><SelectValue placeholder="ALL ROLES" /></SelectTrigger><SelectContent><SelectItem value="all">ALL ROLES</SelectItem>{roles.map((item) => item ? <SelectItem key={item} value={item}>{item}</SelectItem> : null)}</SelectContent></Select>
-        <Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Sort members"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="az">A → Z</SelectItem><SelectItem value="za">Z → A</SelectItem><SelectItem value="rollAsc">ROLL ASC</SelectItem><SelectItem value="rollDesc">ROLL DESC</SelectItem></SelectContent></Select>
+      <div className="directory-bar reveal">
+        <Button variant={panelOpen ? "hud" : "hudOutline"} onClick={() => setPanelOpen((open) => !open)} aria-expanded={panelOpen} aria-controls="member-search-panel">
+          <Search aria-hidden="true" /> SEARCH MEMBERS {panelOpen ? <X aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
+        </Button>
         <p className="result-count"><span>{String(results.length).padStart(3, "0")}</span> NODES FOUND</p>
       </div>
+      <div id="member-search-panel" className={`directory-console ${panelOpen ? "is-open" : ""}`} hidden={!panelOpen}>
+        <div className="search-box"><Search aria-hidden="true" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="SEARCH BATCH DATABASE..." aria-label="Search members by name, roll or registration" /></div>
+        <Select value={role} onValueChange={setRole}><SelectTrigger aria-label="Filter by role"><SelectValue placeholder="ALL ROLES" /></SelectTrigger><SelectContent><SelectItem value="all">ALL ROLES</SelectItem>{roles.map((item) => item ? <SelectItem key={item} value={item}>{item}</SelectItem> : null)}</SelectContent></Select>
+        <Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Sort members"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="az">A → Z</SelectItem><SelectItem value="za">Z → A</SelectItem><SelectItem value="rollAsc">ROLL ASC</SelectItem><SelectItem value="rollDesc">ROLL DESC</SelectItem></SelectContent></Select>
+      </div>
       <div className="member-grid">
-        {results.map((member, index) => (
-          <article className="member-card reveal" key={`${member.name}-${index}`}>
+        {visible.map((member, index) => (
+          <article className="member-card reveal is-visible" key={`${member.name}-${index}`}>
             <div className="card-scan"><MemberAvatar member={member} /><span>IDENTITY VERIFIED</span></div>
             <div className="member-card-body">
               <p className="node-id">CSE // {member.roll.replace("CSE-", "")}</p>
@@ -228,6 +246,14 @@ function Members() {
           </article>
         ))}
       </div>
+      {!isFiltering && results.length > MEMBER_PREVIEW_COUNT ? (
+        <div className="directory-expand">
+          <Button variant="hudOutline" size="lg" onClick={() => setShowAll((value) => !value)} aria-expanded={showAll}>
+            {showAll ? "SHOW FEWER MEMBERS" : `SHOW ALL MEMBERS (${results.length})`} <ArrowDown aria-hidden="true" />
+          </Button>
+          {!showAll ? <p>{hidden} MORE NODES HIDDEN</p> : null}
+        </div>
+      ) : null}
       {!results.length ? <div className="empty-state"><Terminal /><h3>NO NODES FOUND</h3><p>Adjust the search or filter parameters.</p></div> : null}
       <Dialog open={Boolean(selected)} onOpenChange={(open) => { if (!open) setSelected(null); }}>{selected ? <MemberProfile member={selected} onClose={() => setSelected(null)} /> : null}</Dialog>
     </section>
