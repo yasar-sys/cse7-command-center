@@ -51,10 +51,14 @@ function PlaceholderImage({ label, className = "" }: { label: string; className?
   );
 }
 
+function markBroken(node: HTMLImageElement | null, onFail: () => void) {
+  if (node && node.complete && node.naturalWidth === 0) onFail();
+}
+
 function SmartImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <PlaceholderImage label={`${alt} placeholder`} className={className} />;
-  return <img className={className} src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} />;
+  return <img className={className} src={src} alt={alt} loading="lazy" ref={(node) => markBroken(node, () => setFailed(true))} onError={() => setFailed(true)} />;
 }
 
 function Navbar() {
