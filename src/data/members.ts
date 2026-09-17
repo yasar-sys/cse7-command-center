@@ -101,7 +101,7 @@ export const members: Member[] = [
     roll: "CSE-230314",
     registration: "2023-752-766",
     studentId: "2023-752-766",
-    email: "rahiatul.jannat@example.edu",
+    email: "rahiatuljannat8134@gmail.com",
     image: "/members/rahiatul-jannat.jpg",
   },
   // ── Sl 10 ──
@@ -353,7 +353,7 @@ export const members: Member[] = [
     roll: "CSE-230351",
     registration: "2023-552-803",
     studentId: "2023-552-803",
-    email: "samin.sunny@example.edu",
+    email: "saminyasarsunny@gmail.com",
     image: "/members/samin-yasar-sunny.jpg",
   },
   // ── Sl 38 ──
