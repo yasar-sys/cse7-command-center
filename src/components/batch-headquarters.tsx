@@ -154,7 +154,7 @@ function About() {
 function MemberAvatar({ member, large = false }: { member: Member; large?: boolean }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <div className={`member-avatar fallback ${large ? "large" : ""}`} role="img" aria-label={`Default avatar for ${member.name}`}><span>{member.name.slice(0, 2)}</span><ShieldCheck /></div>;
-  return <img className={`member-avatar ${large ? "large" : ""}`} src={member.image} alt={`${member.name} profile`} loading="lazy" onError={() => setFailed(true)} />;
+  return <img className={`member-avatar ${large ? "large" : ""}`} src={member.image} alt={`${member.name} profile`} loading="lazy" ref={(node) => markBroken(node, () => setFailed(true))} onError={() => setFailed(true)} />;
 }
 
 function MemberProfile({ member, onClose }: { member: Member; onClose: () => void }) {
