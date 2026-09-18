@@ -18,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { achievements, memories, projects, quotes, siteDetails, stats, timeline } from "@/data/content";
-import { members, type Member } from "@/data/members";
+import type { Memory } from "@/data/content";
+import type { Member } from "@/data/members";
+import { useSiteContent } from "@/hooks/use-site-content";
 
 const navItems = ["HOME", "ABOUT", "MEMBERS", "ACHIEVEMENTS", "MEMORIES", "CONTACT"];
 const memoryFilters = ["ALL", "CAMPUS", "EVENTS", "TOURS", "PROJECTS", "COMPETITIONS", "RANDOM MOMENTS"];
@@ -133,6 +134,7 @@ function Hero() {
 }
 
 function About() {
+  const { stats } = useSiteContent();
   return (
     <section id="about" className="section-shell about-section">
       <SectionHeading code="01 // BATCH PROFILE" title="THE ARCHITECTURE OF US" />
@@ -191,13 +193,14 @@ function MemberProfile({ member, onClose }: { member: Member; onClose: () => voi
 const MEMBER_PREVIEW_COUNT = 12;
 
 function Members() {
+  const { members } = useSiteContent();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("az");
   const [role, setRole] = useState("all");
   const [panelOpen, setPanelOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState<Member | null>(null);
-  const roles = useMemo(() => [...new Set(members.map((member) => member.role).filter(Boolean))], []);
+  const roles = useMemo(() => [...new Set(members.map((member) => member.role).filter(Boolean))], [members]);
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const filtered = members.filter((member) => {
@@ -210,7 +213,7 @@ function Members() {
       if (sort === "rollDesc") return b.roll.localeCompare(a.roll);
       return a.name.localeCompare(b.name);
     });
-  }, [query, role, sort]);
+  }, [members, query, role, sort]);
 
   const isFiltering = query.trim().length > 0 || role !== "all";
   const expanded = showAll || isFiltering;
@@ -261,6 +264,7 @@ function Members() {
 }
 
 function Achievements() {
+  const { achievements } = useSiteContent();
   return (
     <section id="achievements" className="section-shell mission-section">
       <SectionHeading code="03 // VERIFIED OUTPUT" title="MISSION LOG" copy="Milestones, signals, and achievements will be recorded here." />
@@ -272,8 +276,9 @@ function Achievements() {
 }
 
 function Memories() {
+  const { memories } = useSiteContent();
   const [filter, setFilter] = useState("ALL");
-  const [selected, setSelected] = useState<(typeof memories)[number] | null>(null);
+  const [selected, setSelected] = useState<Memory | null>(null);
   const visible = filter === "ALL" ? memories : memories.filter((item) => item.category === filter);
   return (
     <section id="memories" className="section-shell memories-section">
@@ -288,6 +293,7 @@ function Memories() {
 }
 
 function TimelineAndProjects() {
+  const { timeline, projects } = useSiteContent();
   return (
     <>
       <section className="section-shell batch-timeline">
@@ -303,10 +309,12 @@ function TimelineAndProjects() {
 }
 
 function BatchWall() {
+  const { quotes } = useSiteContent();
   return <section className="wall-section"><div className="section-shell"><SectionHeading code="07 // OPEN CHANNEL" title="THE BATCH WALL" /><div className="quotes-grid">{quotes.map((item, index) => <blockquote className="quote-card reveal" key={index}><span>“</span><p>{item.quote}</p><footer>— {item.author}</footer></blockquote>)}</div></div></section>;
 }
 
 function Footer() {
+  const { siteDetails } = useSiteContent();
   return (
     <footer id="contact" className="site-footer">
       <div className="footer-grid">
@@ -317,7 +325,7 @@ function Footer() {
         </div>
       </div>
       <p className="privacy-note">PRIVACY NOTICE // Only information explicitly added to the editable batch records is displayed.</p>
-      <div className="footer-bottom"><p>© 2026 CSE 7th Batch. All rights reserved.</p><p><Terminal /> CONNECTION TERMINATED // SEE YOU IN THE NEXT COMMIT</p></div>
+      <div className="footer-bottom"><p>© 2026 CSE 7th Batch. All rights reserved.</p><p><Terminal /> CONNECTION TERMINATED // SEE YOU IN THE NEXT COMMIT</p><a className="admin-access-link" href="/auth">SYSTEM ACCESS</a></div>
     </footer>
   );
 }
