@@ -33,6 +33,19 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 type Row = Record<string, unknown>;
 
+/** Extra optional fields the editor always offers, even when no record uses them yet. */
+const extraFields: Partial<Record<ContentKey, string[]>> = {
+  members: ["image", "role", "activities", "achievements", "github", "linkedin", "portfolio"],
+  achievements: ["image", "link"],
+  projects: ["image", "github", "demo"],
+};
+
+/** Fields edited as one item per line instead of comma separated. */
+const lineFields = new Set(["activities", "achievements"]);
+
+/** Fields that hold a picture. */
+const imageFields = new Set(["image", "photo", "avatar"]);
+
 function fieldNames(key: ContentKey, records: Row[]): string[] {
   const names = new Set<string>();
   const sample = (contentDefaults[key] as unknown as Row[] | Row);
@@ -40,6 +53,7 @@ function fieldNames(key: ContentKey, records: Row[]): string[] {
   for (const record of [...defaults, ...records]) {
     if (record && typeof record === "object") Object.keys(record).forEach((name) => names.add(name));
   }
+  (extraFields[key] ?? []).forEach((name) => names.add(name));
   return [...names];
 }
 
