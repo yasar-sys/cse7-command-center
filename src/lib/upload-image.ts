@@ -11,7 +11,7 @@ export async function uploadSiteImage(file: File): Promise<string> {
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
-    .upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type || undefined });
+    .upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type || "image/jpeg" });
   if (uploadError) throw uploadError;
 
   const { data, error: signError } = await supabase.storage.from(BUCKET).createSignedUrl(path, LINK_LIFETIME);
