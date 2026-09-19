@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, LogOut, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, LogOut, Plus, RefreshCw, Save, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSiteContentRows, siteContentQueryKey } from "@/hooks/use-site-content";
+import { uploadSiteImage } from "@/lib/upload-image";
 import {
   blankRecord,
   contentDefaults,
@@ -33,6 +34,19 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 type Row = Record<string, unknown>;
 
+/** Extra optional fields the editor always offers, even when no record uses them yet. */
+const extraFields: Partial<Record<ContentKey, string[]>> = {
+  members: ["image", "role", "activities", "achievements", "github", "linkedin", "portfolio"],
+  achievements: ["image", "link"],
+  projects: ["image", "github", "demo"],
+};
+
+/** Fields edited as one item per line instead of comma separated. */
+const lineFields = new Set(["activities", "achievements"]);
+
+/** Fields that hold a picture. */
+const imageFields = new Set(["image", "photo", "avatar"]);
+
 function fieldNames(key: ContentKey, records: Row[]): string[] {
   const names = new Set<string>();
   const sample = (contentDefaults[key] as unknown as Row[] | Row);
@@ -40,6 +54,7 @@ function fieldNames(key: ContentKey, records: Row[]): string[] {
   for (const record of [...defaults, ...records]) {
     if (record && typeof record === "object") Object.keys(record).forEach((name) => names.add(name));
   }
+  (extraFields[key] ?? []).forEach((name) => names.add(name));
   return [...names];
 }
 
@@ -215,6 +230,63 @@ function ListEditor({ sectionKey, records, onChange }: { sectionKey: ContentKey;
   );
 }
 
+function ImageField({ field, value, onChange }: { field: string; value: string; onChange: (next: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleFiles(files: FileList | null) {
+    const file = files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { setUploadError("Please choose an image file."); return; }
+    setBusy(true);
+    setUploadError(null);
+    try {
+      onChange(await uploadSiteImage(file));
+    } catch (uploadFailure) {
+      setUploadError(uploadFailure instanceof Error ? uploadFailure.message : "Upload failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="admin-field is-wide admin-image-field">
+      <span>{field} (upload or paste a link)</span>
+      <div
+        className={`admin-dropzone ${dragging ? "is-dragging" : ""}`}
+        onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(event) => { event.preventDefault(); setDragging(false); handleFiles(event.dataTransfer.files); }}
+      >
+        {value ? <img src={value} alt="" className="admin-image-preview" /> : <ImageIcon aria-hidden="true" />}
+        <div className="admin-dropzone-copy">
+          <strong>{busy ? "UPLOADING…" : "DROP A PICTURE HERE"}</strong>
+          <small>JPG or PNG, up to 10 MB</small>
+          <div className="admin-dropzone-actions">
+            <Button type="button" variant="hudOutline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+              <Upload aria-hidden="true" /> CHOOSE FILE
+            </Button>
+            {value ? (
+              <Button type="button" variant="hudOutline" size="sm" onClick={() => onChange("")}>REMOVE</Button>
+            ) : null}
+          </div>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={(event) => { handleFiles(event.target.files); event.target.value = ""; }}
+        />
+      </div>
+      <Input value={value} placeholder="/members/photo.jpg or https://…" onChange={(event) => onChange(event.target.value)} />
+      {uploadError ? <small className="auth-error">{uploadError}</small> : null}
+    </div>
+  );
+}
+
 function ObjectEditor({ record, fields, onChange }: { record: Row; fields?: string[]; onChange: (next: Row) => void }) {
   const keys = fields ?? Object.keys(record);
   return (
@@ -222,6 +294,30 @@ function ObjectEditor({ record, fields, onChange }: { record: Row; fields?: stri
       {keys.map((field) => {
         const value = record[field];
         const id = `${field}-${Math.abs(keys.join().length)}`;
+        if (imageFields.has(field)) {
+          return (
+            <ImageField
+              key={field}
+              field={field}
+              value={value == null ? "" : String(value)}
+              onChange={(next) => onChange({ ...record, [field]: next })}
+            />
+          );
+        }
+        if (lineFields.has(field)) {
+          const list = Array.isArray(value) ? value.map(String) : value ? [String(value)] : [];
+          return (
+            <label className="admin-field is-wide" key={field} htmlFor={id}>
+              <span>{field} (one per line)</span>
+              <Textarea
+                id={id}
+                rows={4}
+                value={list.join("\n")}
+                onChange={(event) => onChange({ ...record, [field]: event.target.value.split("\n").map((part) => part.trim()).filter(Boolean) })}
+              />
+            </label>
+          );
+        }
         if (typeof value === "boolean") {
           return (
             <label className="admin-field admin-field-check" key={field}>

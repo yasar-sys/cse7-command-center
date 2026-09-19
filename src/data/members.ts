@@ -10,6 +10,8 @@ export type Member = {
   linkedin?: string;
   portfolio?: string;
   role?: string;
+  activities?: string[];
+  achievements?: string[];
   isPlaceholder?: boolean;
 };
 
