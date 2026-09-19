@@ -178,6 +178,18 @@ function MemberProfile({ member, onClose }: { member: Member; onClose: () => voi
             <div><dt>GMAIL</dt><dd><a href={`mailto:${member.email}`}>{member.email}</a></dd></div>
             {member.role ? <div><dt>ROLE</dt><dd>{member.role}</dd></div> : null}
           </dl>
+          {member.activities?.length ? (
+            <div className="identity-list">
+              <h4>ACTIVITIES</h4>
+              <ul>{member.activities.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}</ul>
+            </div>
+          ) : null}
+          {member.achievements?.length ? (
+            <div className="identity-list">
+              <h4>ACHIEVEMENTS</h4>
+              <ul>{member.achievements.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}</ul>
+            </div>
+          ) : null}
           <div className="social-row">
             {member.github ? <a href={member.github} target="_blank" rel="noreferrer"><Github /> GitHub</a> : null}
             {member.linkedin ? <a href={member.linkedin} target="_blank" rel="noreferrer"><Linkedin /> LinkedIn</a> : null}
