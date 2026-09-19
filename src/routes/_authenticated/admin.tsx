@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, LogOut, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, LogOut, Plus, RefreshCw, Save, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSiteContentRows, siteContentQueryKey } from "@/hooks/use-site-content";
+import { uploadSiteImage } from "@/lib/upload-image";
 import {
   blankRecord,
   contentDefaults,
