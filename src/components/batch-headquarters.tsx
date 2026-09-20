@@ -178,6 +178,13 @@ function MemberProfile({ member, onClose }: { member: Member; onClose: () => voi
             <div><dt>GMAIL</dt><dd><a href={`mailto:${member.email}`}>{member.email}</a></dd></div>
             {member.role ? <div><dt>ROLE</dt><dd>{member.role}</dd></div> : null}
           </dl>
+          {member.summary ? <p className="identity-summary">{member.summary}</p> : null}
+          {member.highlights?.length ? (
+            <div className="identity-list">
+              <h4>HIGHLIGHTS</h4>
+              <ul>{member.highlights.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}</ul>
+            </div>
+          ) : null}
           {member.activities?.length ? (
             <div className="identity-list">
               <h4>ACTIVITIES</h4>

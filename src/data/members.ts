@@ -12,6 +12,8 @@ export type Member = {
   role?: string;
   activities?: string[];
   achievements?: string[];
+  summary?: string;
+  highlights?: string[];
   isPlaceholder?: boolean;
 };
 
