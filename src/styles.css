@@ -388,7 +388,7 @@ a { color: inherit; text-decoration: none; }
 .admin-ai-row small {
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .identity-summary {
