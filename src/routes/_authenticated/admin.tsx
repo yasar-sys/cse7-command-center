@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Image as ImageIcon, LogOut, Plus, RefreshCw, Save, Trash2, Upload } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowLeft, Image as ImageIcon, LogOut, Plus, RefreshCw, Save, Sparkles, Trash2, Upload } from "lucide-react";
+import { generateMemberSummary } from "@/lib/member-summary.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,13 +38,13 @@ type Row = Record<string, unknown>;
 
 /** Extra optional fields the editor always offers, even when no record uses them yet. */
 const extraFields: Partial<Record<ContentKey, string[]>> = {
-  members: ["image", "role", "activities", "achievements", "github", "linkedin", "portfolio"],
+  members: ["image", "role", "activities", "achievements", "summary", "highlights", "github", "linkedin", "portfolio"],
   achievements: ["image", "link"],
   projects: ["image", "github", "demo"],
 };
 
 /** Fields edited as one item per line instead of comma separated. */
-const lineFields = new Set(["activities", "achievements"]);
+const lineFields = new Set(["activities", "achievements", "highlights"]);
 
 /** Fields that hold a picture. */
 const imageFields = new Set(["image", "photo", "avatar"]);
@@ -204,6 +206,44 @@ function AdminPanel() {
   );
 }
 
+function SummaryButton({ record, onChange }: { record: Row; onChange: (next: Row) => void }) {
+  const generate = useServerFn(generateMemberSummary);
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setFailure(null);
+    try {
+      const asList = (value: unknown) => (Array.isArray(value) ? value.map(String) : value ? [String(value)] : []);
+      const result = await generate({
+        data: {
+          name: String(record.name ?? "").trim() || "Batch member",
+          role: record.role ? String(record.role) : null,
+          activities: asList(record.activities),
+          achievements: asList(record.achievements),
+          tone: "terminal" as const,
+        },
+      });
+      onChange({ ...record, summary: result.summary, highlights: result.highlights });
+    } catch (error) {
+      setFailure(error instanceof Error ? error.message : "Could not write the summary. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="admin-ai-row">
+      <Button type="button" variant="hudOutline" size="sm" disabled={busy} onClick={run}>
+        <Sparkles aria-hidden="true" /> {busy ? "WRITING…" : "WRITE SUMMARY WITH AI"}
+      </Button>
+      <small>Uses only the activities and achievements typed above.</small>
+      {failure ? <small className="auth-error">{failure}</small> : null}
+    </div>
+  );
+}
+
 function ListEditor({ sectionKey, records, onChange }: { sectionKey: ContentKey; records: Row[]; onChange: (next: Row[]) => void }) {
   const fields = fieldNames(sectionKey, records);
   return (
@@ -216,6 +256,9 @@ function ListEditor({ sectionKey, records, onChange }: { sectionKey: ContentKey;
               <Trash2 aria-hidden="true" /> DELETE
             </Button>
           </header>
+          {sectionKey === "members" ? (
+            <SummaryButton record={record} onChange={(next) => onChange(records.map((item, i) => (i === index ? next : item)))} />
+          ) : null}
           <ObjectEditor
             record={record}
             fields={fields}
