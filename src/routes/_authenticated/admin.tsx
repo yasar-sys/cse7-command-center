@@ -218,10 +218,10 @@ function SummaryButton({ record, onChange }: { record: Row; onChange: (next: Row
       const asList = (value: unknown) => (Array.isArray(value) ? value.map(String) : value ? [String(value)] : []);
       const result = await generate({
         data: {
-          name: String(record.name ?? "").trim() || "Batch member",
-          role: record.role ? String(record.role) : null,
-          activities: asList(record.activities),
-          achievements: asList(record.achievements),
+          name: String(record["name"] ?? "").trim() || "Batch member",
+          role: record["role"] ? String(record["role"]) : null,
+          activities: asList(record["activities"]),
+          achievements: asList(record["achievements"]),
           tone: "terminal" as const,
         },
       });
